@@ -48,8 +48,9 @@
         </form>
         <hr>
         <h4 class="m-0 mt-1">Total Produtos: R$ <span id="total-carrinho">2</span></h4>
-        <h4 class="m-0 mt-1" id="valor-frete"></h4>
-        <hr id="hr-total" style="display: none;">
+        <hr>
+        <h5 class="m-0 mt-1" id="valor-frete"></h5>
+        <hr id="hr-total" class="mt-1" style="display: none;">
         <h3 class="m-0" id="total-geral" style="color: red;"></h3>
     <?php
     } else {

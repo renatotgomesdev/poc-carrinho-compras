@@ -66,7 +66,7 @@ window.onload = function() {
         limparCarrinho();
     });
 
-    if(document.querySelector('#btn-calcula-frete')) {
+    if (document.querySelector('#btn-calcula-frete')) {
         const btnCalculaFrete = document.querySelector('#btn-calcula-frete');
         btnCalculaFrete.addEventListener('click', function() {
             calcularFrete();
@@ -264,7 +264,31 @@ function atualizaTotalCarrinho() {
     if (document.querySelector('#total-carrinho')) {
         let totalCarrinho = document.querySelector('#total-carrinho').textContent;
         if (document.querySelector('#total-carrinho')) {
-            valorFrete = document.querySelector('#retorno-valor-frete').textContent;
+            valorFrete = document.querySelector('#retorno-valor-frete-pac').textContent;
+            //valorFrete = document.querySelector('#retorno-valor-frete-sedex').textContent;
+        }
+
+        let valorAtualizado = convertNumberBRparaFloat(totalCarrinho) + convertNumberBRparaFloat(valorFrete);
+        document.querySelector('#total-geral').textContent = 'Total da Compra: R$ ' + convertNumberFormatBR(valorAtualizado);
+        document.getElementById('hr-total').style.display = 'block';
+    }
+}
+
+function atualizaTotalCarrinhoRadio(inputRadio) {
+    let valorFrete = '';
+    if (document.querySelector('#total-carrinho')) {
+        let totalCarrinho = document.querySelector('#total-carrinho').textContent;
+        if (document.querySelector('#total-carrinho')) {
+            // Remove o atributo "checked" de todos os inputs com o mesmo nome
+            var inputs = document.getElementsByName(inputRadio.name);
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].removeAttribute("checked");
+            }
+            // Adiciona o atributo "checked" no input clicado
+            inputRadio.setAttribute("checked", true);
+            // Obtém o valor do input clicado e exibe no console
+            valorFrete = inputRadio.value;
+            //console.log(valor);
         }
 
         let valorAtualizado = convertNumberBRparaFloat(totalCarrinho) + convertNumberBRparaFloat(valorFrete);
