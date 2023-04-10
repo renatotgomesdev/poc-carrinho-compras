@@ -1,0 +1,8 @@
+{
+    "name": "api/correios",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

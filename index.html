@@ -5,22 +5,32 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste localStorage</title>
+    <title>POC - Carrinho de Compras</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <form action="resultado.php" method="GET">
-        <input type="hidden" id="carrinho" name="carrinho" value="0">
-        <button type="submit" class="btn btn-warning">Carrinho de Compras <span class="carrinho">0</span></button>
-    </form>
-    <br>
-    <div>
-        <button class="btn-adicionar btn btn-primary" data-id="1" data-value="30,00">Item 1</button>
-        <button class="btn-adicionar btn btn-primary" data-id="2" data-value="50,00">Item 2</button>
-        <button class="btn-adicionar btn btn-primary" data-id="3" data-value="25,00">Item 3</button>
+    <h1>POC - Carrinho de Compras com Cálculo de Envio pelos Correios</h1>
+    <hr>
+    <div style="display: inline-block;">
+        <form action="resultado.php" method="GET">
+            <div class="carrinho-compras">
+                <input type="hidden" id="carrinho" name="carrinho" value="0">
+                <button type="submit" class="btn alert-dark label-carrinho">Carrinho de Compras</button>
+                <button type="submit" class="btn alert-dark carrinho label-carrinho btn-label-carrinho">0</button>
+            </div>
+        </form>
+    </div>
+    <div style="display: inline-block;">
         <button class="btn btn-danger" id="btn-limpar">Limpar Dados</button>
+    </div>
+    <div style="margin-top: 30px;">
+        <button class="btn-adicionar btn btn-primary produto" data-id="1" data-value="30,00">Produto 1</button>
+        <button class="btn-adicionar btn btn-primary produto" data-id="2" data-value="50,00">Produto 2</button>
+        <button class="btn-adicionar btn btn-primary produto" data-id="3" data-value="25,00">Produto 3</button>
+        
     </div>
     <script src="scripts.js"></script>
 </body>
+
 </html>

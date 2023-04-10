@@ -9,6 +9,7 @@ window.onload = function() {
 
     document.querySelectorAll('.btn-qtd').forEach(function(botao) {
         botao.addEventListener('click', function() {
+            reset();
             var op = this.textContent;
             if (op == '-') {
                 var qtd = parseInt(this.nextSibling.value) - 1;
@@ -44,8 +45,9 @@ window.onload = function() {
 
     document.querySelectorAll('.box-qtd').forEach(function(botao) {
         botao.addEventListener('blur', function() {
+            reset();
             var qtd = this.value;
-            if (qtd < 1) { 
+            if (qtd < 1) {
                 qtd = 1;
                 this.value = qtd;
             }
@@ -64,6 +66,14 @@ window.onload = function() {
         limparCarrinho();
     });
 
+    if(document.querySelector('#btn-calcula-frete')) {
+        const btnCalculaFrete = document.querySelector('#btn-calcula-frete');
+        btnCalculaFrete.addEventListener('click', function() {
+            calcularFrete();
+            setTimeout(atualizaTotalCarrinho, 1200);
+        });
+    }
+
     let db = new dbStorage("itens");
     let itens = db.all();
     if (itens) {
@@ -77,7 +87,7 @@ window.onload = function() {
     if (document.querySelector('#total-carrinho')) {
         document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item");
     }
-    
+
 
     //debugger
     document.querySelectorAll('.valorUnitario').forEach(function(el) {
@@ -178,7 +188,7 @@ function multiplicarFormatBr(valor, multiplicador) {
     valor = valor.replace(",", ".");
     num = parseFloat(valor);
     res = num * multiplicador;
-    resFormatado = res.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    resFormatado = res.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return resFormatado;
 }
 
@@ -187,7 +197,7 @@ function dividirFormatBr(valor, divisor) {
     valor = valor.replace(",", ".");
     num = parseFloat(valor);
     res = num / divisor;
-    resFormatado = res.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    resFormatado = res.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return resFormatado;
 }
 
@@ -200,7 +210,7 @@ function calculaTextContent(el) {
         valor = parseFloat(conteudo);
         soma += valor;
     });
-    return soma.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});;
+    return soma.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });;
 }
 
 function calcularValue(el) {
@@ -212,5 +222,53 @@ function calcularValue(el) {
         valor = parseFloat(conteudo);
         soma += valor;
     });
-    return soma.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});;
+    return soma.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });;
+}
+
+function convertNumberBRparaFloat(num) {
+    conteudo = num;
+    conteudo = conteudo.replace(".", "");
+    conteudo = conteudo.replace(",", ".");
+    valor = parseFloat(conteudo);
+    return valor;
+}
+
+function convertNumberFormatBR(num) {
+    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function calcularFrete() {
+    // Captura o valor do input cep
+    var cep = document.getElementById("cep").value;
+
+    // Cria uma solicitação AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            // Atualiza o valor do span valor-frete com a resposta do servidor
+            document.getElementById("valor-frete").innerHTML = xhr.responseText;
+        }
+    };
+    xhr.open('GET', 'calcular.php?cep=' + cep, true);
+    xhr.send();
+}
+
+function reset() {
+    document.getElementById('valor-frete').innerHTML = '';
+    document.getElementById('total-geral').innerHTML = '';
+    document.getElementById('hr-total').style.display = 'none';
+}
+
+function atualizaTotalCarrinho() {
+    let valorFrete = '';
+    if (document.querySelector('#total-carrinho')) {
+        let totalCarrinho = document.querySelector('#total-carrinho').textContent;
+        if (document.querySelector('#total-carrinho')) {
+            valorFrete = document.querySelector('#retorno-valor-frete').textContent;
+        }
+
+        let valorAtualizado = convertNumberBRparaFloat(totalCarrinho) + convertNumberBRparaFloat(valorFrete);
+        document.querySelector('#total-geral').textContent = 'Total da Compra: R$ ' + convertNumberFormatBR(valorAtualizado);
+        document.getElementById('hr-total').style.display = 'block';
+    }
 }
