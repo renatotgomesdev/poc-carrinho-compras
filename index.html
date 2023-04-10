@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste localStorage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <form action="resultado.php" method="GET">
+        <input type="hidden" id="carrinho" name="carrinho" value="0">
+        <button type="submit" class="btn btn-warning">Carrinho de Compras <span class="carrinho">0</span></button>
+    </form>
+    <br>
+    <div>
+        <button class="btn-adicionar btn btn-primary" data-id="1" data-value="30,00">Item 1</button>
+        <button class="btn-adicionar btn btn-primary" data-id="2" data-value="50,00">Item 2</button>
+        <button class="btn-adicionar btn btn-primary" data-id="3" data-value="25,00">Item 3</button>
+        <button class="btn btn-danger" id="btn-limpar">Limpar Dados</button>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
