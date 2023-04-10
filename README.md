@@ -1,6 +1,6 @@
 # Carrinho de Compras de uma Loja Virtual
 ## POC (Proof of Concept) - Prova de Conceito
-Para simular e testar um Carrinho de Compras de uma Loja Virtual implementando também a API dos Correios para cálcular o frete
+### Simular um Carrinho de Compras de uma Loja Virtual implementando também a API dos Correios para cálcular o frete
 
 Na página inicial index.html é exibido 3 botões simulando os produtos (Item 1, Item 2 e Item 3).
 
