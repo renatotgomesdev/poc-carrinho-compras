@@ -1,4 +1,10 @@
 window.onload = function() {
+
+    /**
+     * Seleciona todos os elementos com a classe "btn-adicionar" e adiciona um evento de clique a eles.
+     * Quando clicado, é capturado o ID e o valor do atributo "data" do botão clicado e passado para a função "addCarrinho".
+     * @returns {void}
+     */
     document.querySelectorAll('.btn-adicionar').forEach(function(botao) {
         botao.addEventListener('click', function() {
             var id = this.getAttribute('data-id');
@@ -7,6 +13,11 @@ window.onload = function() {
         });
     });
 
+    /**
+     * Adiciona eventos de clique aos botões de alteração da quantidade de itens no carrinho.
+     * Atualiza o valor total do carrinho e armazena as alterações no armazenamento local.
+     * @function
+     */
     document.querySelectorAll('.btn-qtd').forEach(function(botao) {
         botao.addEventListener('click', function() {
             reset();
@@ -43,6 +54,11 @@ window.onload = function() {
         });
     });
 
+    /**
+     * Adiciona um listener de evento blur em todos os elementos com classe "box-qtd", que executa ações como resetar o carrinho,
+     * verificar a quantidade digitada pelo usuário, calcular o valor do produto a partir da quantidade, atualizar o valor exibido na página
+     * e exibir um log no console com informações sobre a operação realizada.
+     */
     document.querySelectorAll('.box-qtd').forEach(function(botao) {
         botao.addEventListener('blur', function() {
             reset();
@@ -61,16 +77,24 @@ window.onload = function() {
         });
     });
 
+    /**
+     * Seleciona o botão de limpar carrinho e adiciona um listener de clique que chama a função "limparCarrinho".
+     */
     const btnLimpar = document.querySelector('#btn-limpar');
     btnLimpar.addEventListener('click', function() {
         limparCarrinho();
     });
 
+    /**
+     * Verifica se o botão de cálculo de frete existe na página e adiciona um ouvinte de evento de clique.
+     * Quando o botão é clicado, chama as funções calcularFrete() e atualizaTotalCarrinho() com um atraso de 1.2 segundos.
+     */
     if (document.querySelector('#btn-calcula-frete')) {
         const btnCalculaFrete = document.querySelector('#btn-calcula-frete');
         btnCalculaFrete.addEventListener('click', function() {
             calcularFrete();
             setTimeout(atualizaTotalCarrinho, 1200);
+            setTimeout(atualizaTotalCarrinhoQuantidade, 2000);
         });
     }
 
@@ -98,7 +122,17 @@ window.onload = function() {
 
 }
 
+/**
+ * Cria e retorna um objeto com funções para manipulação de dados em localStorage.
+ * @param {string} table - O nome da tabela a ser criada ou manipulada.
+ * @returns {Object} - O objeto com funções para manipulação de dados.
+ */
 function dbStorage(table) {
+
+    /**
+     * Retorna todos os dados de uma tabela em localStorage.
+     * @returns {Array|Number} - Um array com todos os dados da tabela ou 0 caso a tabela não exista.
+     */
     function all() {
         if (JSON.parse(localStorage.getItem(table)) === null) {
             return 0;
@@ -107,6 +141,12 @@ function dbStorage(table) {
         }
     }
 
+    /**
+     * Adiciona um novo registro em uma tabela em localStorage.
+     * @param {Array} data - O array de dados da tabela.
+     * @param {Object} reg - O objeto com os dados do novo registro.
+     * @param {string} cod - O código do registro, se existir.
+     */
     function add(data, reg, cod) {
         if (cod !== "") {
             data[cod] = reg;
@@ -116,6 +156,9 @@ function dbStorage(table) {
         localStorage.setItem(table, JSON.stringify(data));
     }
 
+    /**
+     * Exclui uma tabela em localStorage.
+     */
     function del() {
         localStorage.removeItem(table);
     }
@@ -127,6 +170,12 @@ function dbStorage(table) {
     }
 }
 
+/**
+ * Adiciona um item ao carrinho de compras.
+ * @param {string} id - O identificador do item a ser adicionado.
+ * @param {string} valor - O valor do item a ser adicionado.
+ * @returns {void}
+ */
 function addCarrinho(id, valor) {
     var db = new dbStorage("itens");
     var itemExist = false;
@@ -169,6 +218,9 @@ function addCarrinho(id, valor) {
 
 }
 
+/**
+ * Limpa o carrinho de compras removendo todos os itens armazenados na base de dados local e atualiza a quantidade de itens exibida no ícone do carrinho.
+ */
 function limparCarrinho() {
     var db = new dbStorage("itens");
     db.del();
@@ -183,6 +235,12 @@ function limparCarrinho() {
     location.href = "/";
 }
 
+/**
+ * Multiplica um número no formato "R$ X,XX" por outro número e retorna o resultado formatado como "R$ Y,YY".
+ * @param {string} valor - O valor a ser multiplicado no formato "R$ X,XX".
+ * @param {number} multiplicador - O número pelo qual o valor será multiplicado.
+ * @returns {string} - O resultado da multiplicação formatado como "R$ Y,YY".
+ */
 function multiplicarFormatBr(valor, multiplicador) {
     valor = valor.replace(".", "");
     valor = valor.replace(",", ".");
@@ -192,6 +250,12 @@ function multiplicarFormatBr(valor, multiplicador) {
     return resFormatado;
 }
 
+/**
+ * Divide um número no formato "R$ X,XX" por outro número e retorna o resultado formatado como "R$ Y,YY".
+ * @param {string} valor - O valor a ser dividido no formato "R$ X,XX".
+ * @param {number} divisor - O número pelo qual o valor será dividido.
+ * @returns {string} - O resultado da divisão formatado como "R$ Y,YY".
+ */
 function dividirFormatBr(valor, divisor) {
     valor = valor.replace(".", "");
     valor = valor.replace(",", ".");
@@ -201,6 +265,11 @@ function dividirFormatBr(valor, divisor) {
     return resFormatado;
 }
 
+/**
+ * Função que recebe um seletor CSS como parâmetro e calcula a soma dos valores contidos no textContent dos elementos selecionados pelo seletor.
+ * @param {string} el - Seletor CSS que define os elementos a serem selecionados para o cálculo.
+ * @returns {string} - Retorna uma string formatada como valor monetário em reais (R$) com duas casas decimais separadas por vírgula e pontos para separar milhares.
+ */
 function calculaTextContent(el) {
     let soma = 0;
     document.querySelectorAll(el).forEach(function(elemento) {
@@ -213,6 +282,11 @@ function calculaTextContent(el) {
     return soma.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });;
 }
 
+/**
+ * Calcula a soma dos valores numéricos contidos em um conjunto de elementos HTML.
+ * @param {string} el - O seletor CSS dos elementos a serem somados.
+ * @returns {string} - O valor da soma formatado em moeda brasileira.
+ */
 function calcularValue(el) {
     let soma = 0;
     document.querySelectorAll(el).forEach(function(elemento) {
@@ -225,6 +299,11 @@ function calcularValue(el) {
     return soma.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });;
 }
 
+/**
+ * Converte um número no formato brasileiro (com vírgula como separador decimal) para um número de ponto flutuante.
+ * @param {string} num - O número no formato brasileiro.
+ * @returns {number} - O número de ponto flutuante equivalente.
+ */
 function convertNumberBRparaFloat(num) {
     conteudo = num;
     conteudo = conteudo.replace(".", "");
@@ -233,10 +312,18 @@ function convertNumberBRparaFloat(num) {
     return valor;
 }
 
+/**
+ * Converte um número para o formato brasileiro (com vírgula como separador decimal e dois dígitos após a vírgula).
+ * @param {number} num - O número a ser convertido.
+ * @returns {string} - O número no formato brasileiro.
+ */
 function convertNumberFormatBR(num) {
     return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+/**
+ * Faz uma solicitação AJAX para calcular o valor do frete com base no CEP informado pelo usuário.
+ */
 function calcularFrete() {
     // Captura o valor do input cep
     var cep = document.getElementById("cep").value;
@@ -253,27 +340,67 @@ function calcularFrete() {
     xhr.send();
 }
 
+/**
+ * Reseta os valores exibidos na tela de cálculo de frete.
+ */
 function reset() {
     document.getElementById('valor-frete').innerHTML = '';
     document.getElementById('total-geral').innerHTML = '';
     document.getElementById('hr-total').style.display = 'none';
 }
 
+/**
+ * Atualiza o valor total do carrinho de compras com base no valor do frete selecionado.
+ */
 function atualizaTotalCarrinho() {
     let valorFrete = '';
     if (document.querySelector('#total-carrinho')) {
         let totalCarrinho = document.querySelector('#total-carrinho').textContent;
         if (document.querySelector('#total-carrinho')) {
-            valorFrete = document.querySelector('#retorno-valor-frete-pac').textContent;
+            if (document.querySelector('#retorno-valor-frete-pac')) {
+                valorFrete = document.querySelector('#retorno-valor-frete-pac').textContent;
+            }
+
             //valorFrete = document.querySelector('#retorno-valor-frete-sedex').textContent;
         }
 
         let valorAtualizado = convertNumberBRparaFloat(totalCarrinho) + convertNumberBRparaFloat(valorFrete);
-        document.querySelector('#total-geral').textContent = 'Total da Compra: R$ ' + convertNumberFormatBR(valorAtualizado);
+        document.querySelector('#total-geral').innerHTML = 'Total da Compra: R$ <span>' + convertNumberFormatBR(valorAtualizado) + '</span>';
         document.getElementById('hr-total').style.display = 'block';
     }
 }
 
+function atualizaTotalCarrinhoQuantidade() {
+    let quantidade_total = 0;
+    document.querySelectorAll('.box-qtd').forEach(function(el) {
+        quantidade_total += parseInt(el.value);
+    });
+    console.log(quantidade_total);
+
+    total_carrinho = convertNumberBRparaFloat(document.querySelector('#total-carrinho').textContent);
+    frete_pac = convertNumberBRparaFloat(document.querySelector('#retorno-valor-frete-pac').textContent);
+    frete_sedex = convertNumberBRparaFloat(document.querySelector('#retorno-valor-frete-sedex').textContent);
+    if (document.querySelector('#total-geral')) {
+        total_geral = convertNumberBRparaFloat(document.querySelector('#total-geral > span').textContent);
+    }
+
+
+    frete_pac = frete_pac * quantidade_total;
+    frete_sedex = frete_sedex * quantidade_total;
+    total_geral = total_geral + frete_pac;
+
+    document.querySelector('#retorno-valor-frete-pac').textContent = convertNumberFormatBR(frete_pac);
+    document.querySelector('#retorno-valor-frete-sedex').textContent = convertNumberFormatBR(frete_sedex);
+    document.querySelector('#pac').value = convertNumberFormatBR(frete_pac);
+    document.querySelector('#sedex').value = convertNumberFormatBR(frete_sedex);
+    document.querySelector('#total-geral > span').textContent = convertNumberFormatBR(total_geral);
+
+}
+
+/**
+ * Atualiza o valor total do carrinho de compras com base no valor do frete selecionado através de um input radio.
+ * @param {HTMLInputElement} inputRadio - O input radio clicado que contém o valor do frete selecionado.
+ */
 function atualizaTotalCarrinhoRadio(inputRadio) {
     let valorFrete = '';
     if (document.querySelector('#total-carrinho')) {
@@ -292,7 +419,7 @@ function atualizaTotalCarrinhoRadio(inputRadio) {
         }
 
         let valorAtualizado = convertNumberBRparaFloat(totalCarrinho) + convertNumberBRparaFloat(valorFrete);
-        document.querySelector('#total-geral').textContent = 'Total da Compra: R$ ' + convertNumberFormatBR(valorAtualizado);
+        document.querySelector('#total-geral').innerHTML = 'Total da Compra: R$ <span>' + convertNumberFormatBR(valorAtualizado) + '</span>';
         document.getElementById('hr-total').style.display = 'block';
     }
 }
