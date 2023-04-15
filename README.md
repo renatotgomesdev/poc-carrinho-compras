@@ -19,5 +19,5 @@ Conforme o usuário aumenta ou diminui a quantidade do produto (item) os valores
 #### Implementação API Correios para calcular o frete de envio
 O usuário poderá informar o CEP de destino que será feito o cálculo do frete (Para essa simulação, por enquanto somente considerano 1 item/produto).
 
-### Refaturações
+### Refatorações
 - 15/04/2023 - Criado função para atualizar o valor do frete de acordo com a quantidade de produtos.
