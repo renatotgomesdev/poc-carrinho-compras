@@ -133,3 +133,13 @@ body {
 .form-control {
     border: 1px solid #c0c0c0;
 }
+
+#total-geral {
+    color: red;
+}
+
+.carregando {
+    vertical-align: middle;
+    display: none;
+    margin-left: 40px;
+}

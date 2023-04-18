@@ -1,127 +1,119 @@
+// ===== [Inicio - window.load] Executa somente depois que toda a página HTML é completamente carregada =====
 window.onload = function() {
-
-    /**
-     * Seleciona todos os elementos com a classe "btn-adicionar" e adiciona um evento de clique a eles.
-     * Quando clicado, é capturado o ID e o valor do atributo "data" do botão clicado e passado para a função "addCarrinho".
-     * @returns {void}
-     */
-    document.querySelectorAll('.btn-adicionar').forEach(function(botao) {
-        botao.addEventListener('click', function() {
-            var id = this.getAttribute('data-id');
-            var valor = this.getAttribute('data-value');
-            addCarrinho(id, valor);
+        /**
+         * Adicionar ao Carrinho de Compras
+         * @returns {void}
+         */
+        document.querySelectorAll('.btn-adicionar').forEach(function(botao) {
+            botao.addEventListener('click', function() {
+                var id = this.getAttribute('data-id');
+                var valor = this.getAttribute('data-value');
+                addCarrinho(id, valor);
+            });
         });
-    });
 
-    /**
-     * Adiciona eventos de clique aos botões de alteração da quantidade de itens no carrinho.
-     * Atualiza o valor total do carrinho e armazena as alterações no armazenamento local.
-     * @function
-     */
-    document.querySelectorAll('.btn-qtd').forEach(function(botao) {
-        botao.addEventListener('click', function() {
-            reset();
-            var op = this.textContent;
-            if (op == '-') {
-                var qtd = parseInt(this.nextSibling.value) - 1;
-                if (qtd < 1) qtd = 1;
-                this.nextSibling.value = qtd;
-                var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.value;
-                //var valor_unit = valor;
-                var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
-                var id = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
-                valor = multiplicarFormatBr(valor, qtd);
-                this.nextSibling.nextSibling.nextSibling.nextSibling.textContent = valor;
-            } else {
-                var qtd = parseInt(this.previousSibling.value) + 1;
-                this.previousSibling.value = qtd;
-                var valor = this.nextSibling.nextSibling.nextSibling.value;
-                //var valor_unit = valor;
-                var cod = this.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
-                var id = this.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
-                valor = multiplicarFormatBr(valor, qtd);
-                this.nextSibling.nextSibling.textContent = valor;
-            }
+        // Botões de controle de quantidade de produto
+        document.querySelectorAll('.btn-qtd').forEach(function(botao) {
+            botao.addEventListener('click', function() {
+                reset(); // Faz o reset das informações de frete
+                var op = this.textContent;
+                if (op == '-') { // Executa se for pressionado o botão de diminuir quantidade
+                    var qtd = parseInt(this.nextSibling.value) - 1;
+                    if (qtd < 1) qtd = 1; // Impede que a quantidade seja menor que 1
+                    this.nextSibling.value = qtd;
+                    var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.value;
+                    //var valor_unit = valor;
+                    var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
+                    var id = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
+                    valor = multiplicarFormatBr(valor, qtd);
+                    this.nextSibling.nextSibling.nextSibling.nextSibling.textContent = valor;
+                } else { // Executa se for clicado o botão de aumentar quantidade
+                    var qtd = parseInt(this.previousSibling.value) + 1;
+                    this.previousSibling.value = qtd;
+                    var valor = this.nextSibling.nextSibling.nextSibling.value;
+                    //var valor_unit = valor;
+                    var cod = this.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
+                    var id = this.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
+                    valor = multiplicarFormatBr(valor, qtd);
+                    this.nextSibling.nextSibling.textContent = valor;
+                }
+
+                // Atualiza o valor total do produto de acordo com a quantidade
+                document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item");
+                //console.log('Operação: ' + op + '\nQuantidade: ' + qtd + '\nValor: R$ ' + multiplicarFormatBr(valor, qtd));
+
+                // Atualizar a quantidade e o valor do produto no localStorage
+                let db = new dbStorage("itens");
+                var item = {
+                    id: id,
+                    qtd: qtd,
+                    valor: valor
+                };
+                db.add(itens, item, cod);
+            });
+        });
+
+        // Atualizar a quantiade e o valor digitado diretamente no campo (input)
+        document.querySelectorAll('.box-qtd').forEach(function(botao) {
+            botao.addEventListener('blur', function() {
+                reset(); // Faz o reset das informações de frete
+                var qtd = this.value; // Obtém a quantidade
+
+                // Impede que a quantidade seja menor que 1
+                if (qtd < 1) {
+                    qtd = 1;
+                    this.value = qtd;
+                }
+                var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.value; // Obtém o valor do produto
+                var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod'); // Obtém o código (id) do produto
+                valor = multiplicarFormatBr(valor, qtd); // Função que multiplica o valor pela quantidade e retorna o resultado
+                this.nextSibling.nextSibling.nextSibling.textContent = valor; // Atualizar o valor de acordo com a quantidade
+                document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item"); // Atualizar o valor total do carrinho de compras
+                //console.log('Operação: ' + op + '\nQuantidade: ' + qtd + '\nValor: R$ ' + multiplicarFormatBr(valor, qtd));
+            });
+        });
+
+        // Define a função no botão "Limpar Dados"
+        const btnLimpar = document.querySelector('#btn-limpar');
+        btnLimpar.addEventListener('click', function() {
+            limparCarrinho(); // Função deleta os dados do localStorage
+        });
+
+        // Botão que aciona as funções para cálculo do frete
+        if (document.querySelector('#btn-calcula-frete')) {
+            btnCalculaFrete = document.querySelector('#btn-calcula-frete');
+            btnCalculaFrete.addEventListener('click', function() {
+                calcularFrete();
+                // setTimeout(atualizaTotalCarrinho, 1200);
+                // setTimeout(atualizaTotalCarrinhoQuantidade, 2000);
+            });
+        }
+
+        let db = new dbStorage("itens");
+        let itens = db.all();
+        if (itens) {
+            document.querySelector('.carrinho').textContent = itens.length;
+            document.querySelector('#carrinho').value = JSON.stringify(itens);
+        } else {
+            document.querySelector('.carrinho').textContent = 0;
+            document.querySelector('#carrinho').value = 0;
+        }
+
+        if (document.querySelector('#total-carrinho')) {
             document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item");
-            console.log('Operação: ' + op + '\nQuantidade: ' + qtd + '\nValor: R$ ' + multiplicarFormatBr(valor, qtd));
-            let db = new dbStorage("itens");
-            var item = {
-                id: id,
-                qtd: qtd,
-                valor: valor
-            };
-            db.add(itens, item, cod);
+        }
+
+
+        //debugger
+        document.querySelectorAll('.valorUnitario').forEach(function(el) {
+            let valorTotal = el.value;
+            let valorQtd = el.getAttribute('data-qtd');
+            el.value = dividirFormatBr(valorTotal, valorQtd);
         });
-    });
 
-    /**
-     * Adiciona um listener de evento blur em todos os elementos com classe "box-qtd", que executa ações como resetar o carrinho,
-     * verificar a quantidade digitada pelo usuário, calcular o valor do produto a partir da quantidade, atualizar o valor exibido na página
-     * e exibir um log no console com informações sobre a operação realizada.
-     */
-    document.querySelectorAll('.box-qtd').forEach(function(botao) {
-        botao.addEventListener('blur', function() {
-            reset();
-            var qtd = this.value;
-            if (qtd < 1) {
-                qtd = 1;
-                this.value = qtd;
-            }
-            var op = 0;
-            var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.value;
-            var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
-            valor = multiplicarFormatBr(valor, qtd);
-            this.nextSibling.nextSibling.nextSibling.textContent = valor;
-            document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item");
-            console.log('Operação: ' + op + '\nQuantidade: ' + qtd + '\nValor: R$ ' + multiplicarFormatBr(valor, qtd));
-        });
-    });
+    } // ===== [Fim - window.load] =====
 
-    /**
-     * Seleciona o botão de limpar carrinho e adiciona um listener de clique que chama a função "limparCarrinho".
-     */
-    const btnLimpar = document.querySelector('#btn-limpar');
-    btnLimpar.addEventListener('click', function() {
-        limparCarrinho();
-    });
-
-    /**
-     * Verifica se o botão de cálculo de frete existe na página e adiciona um ouvinte de evento de clique.
-     * Quando o botão é clicado, chama as funções calcularFrete() e atualizaTotalCarrinho() com um atraso de 1.2 segundos.
-     */
-    if (document.querySelector('#btn-calcula-frete')) {
-        const btnCalculaFrete = document.querySelector('#btn-calcula-frete');
-        btnCalculaFrete.addEventListener('click', function() {
-            calcularFrete();
-            setTimeout(atualizaTotalCarrinho, 1200);
-            setTimeout(atualizaTotalCarrinhoQuantidade, 2000);
-        });
-    }
-
-    let db = new dbStorage("itens");
-    let itens = db.all();
-    if (itens) {
-        document.querySelector('.carrinho').textContent = itens.length;
-        document.querySelector('#carrinho').value = JSON.stringify(itens);
-    } else {
-        document.querySelector('.carrinho').textContent = 0;
-        document.querySelector('#carrinho').value = 0;
-    }
-
-    if (document.querySelector('#total-carrinho')) {
-        document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item");
-    }
-
-
-    //debugger
-    document.querySelectorAll('.valorUnitario').forEach(function(el) {
-        let valorTotal = el.value;
-        let valorQtd = el.getAttribute('data-qtd');
-        el.value = dividirFormatBr(valorTotal, valorQtd);
-    });
-
-}
-
+// ===== [Inicio - Funções para tratamento com localStorage] =====
 /**
  * Cria e retorna um objeto com funções para manipulação de dados em localStorage.
  * @param {string} table - O nome da tabela a ser criada ou manipulada.
@@ -234,7 +226,9 @@ function limparCarrinho() {
     //locatin.reload();
     location.href = "/";
 }
+// ===== [Fim - Funções para tratamento com localStorage] =====
 
+// ===== [Inicio - Funções Auxiliáres] =====
 /**
  * Multiplica um número no formato "R$ X,XX" por outro número e retorna o resultado formatado como "R$ Y,YY".
  * @param {string} valor - O valor a ser multiplicado no formato "R$ X,XX".
@@ -320,21 +314,51 @@ function convertNumberBRparaFloat(num) {
 function convertNumberFormatBR(num) {
     return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+// ===== [Fim - Funções para tratamento com localStorage] =====
+
+
+// ===== [Inicio - Funções para obter dados do frete] =====
 
 /**
  * Faz uma solicitação AJAX para calcular o valor do frete com base no CEP informado pelo usuário.
  */
 function calcularFrete() {
+    let loading = document.querySelector('.carregando');
+    loading.style.display = 'inline-block';
+    btnCalculaFrete.style.display = 'none';
     // Captura o valor do input cep
     var cep = document.getElementById("cep").value;
-
     // Cria uma solicitação AJAX
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            // Atualiza o valor do span valor-frete com a resposta do servidor
-            document.getElementById("valor-frete").innerHTML = xhr.responseText;
+            if (xhr.status == 200) {
+                try {
+                    dados_frete = JSON.parse(xhr.responseText);
+                    //return dados_frete;
+                    document.getElementById('radio-pac').value = dados_frete[0].Valor;
+                    document.getElementById('valor-pac').textContent = dados_frete[0].Valor;
+                    document.getElementById('prazo-pac').textContent = dados_frete[0].PrazoEntrega;
+                    document.getElementById('radio-sedex').value = dados_frete[1].Valor;
+                    document.getElementById('valor-sedex').textContent = dados_frete[1].Valor;
+                    document.getElementById('prazo-sedex').textContent = dados_frete[1].PrazoEntrega;
+                    loading.style.display = 'none';
+                    btnCalculaFrete.style.display = 'inline-block';
+                } catch (e) {
+                    alert('Verifique se você informou o CEP corretamente.\nSe o erro persistir, comunique o suporte técnico.')
+                    console.log('Erro: O retorno não é um formato JSON válido');
+                    console.log('Erro retornado: ' + e);
+                    loading.style.display = 'none';
+                    btnCalculaFrete.style.display = 'inline-block';
+                }
+            } else {
+                alert('Verifique se você informou o CEP corretamente.\nSe o erro persistir, comunique o suporte técnico.')
+                console.log('Erro de solicitação: ' + xhr.status);
+                loading.style.display = 'none';
+                btnCalculaFrete.style.display = 'inline-block';
+            }
         }
+
     };
     xhr.open('GET', 'calcular.php?cep=' + cep, true);
     xhr.send();
@@ -423,3 +447,5 @@ function atualizaTotalCarrinhoRadio(inputRadio) {
         document.getElementById('hr-total').style.display = 'block';
     }
 }
+
+// ===== [Fim - Funções para obter dados do frete] =====

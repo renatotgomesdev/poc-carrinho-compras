@@ -73,41 +73,47 @@ if (strlen($frete_sedex->MsgErro)) {
     die('Erro: ' . $frete_sedex->MsgErro);
 }
 
-$msg = '<div class="form-group">
-                <label for="envio" class="form-label">Selecione a forma de envio:</label>
-            </div>';
+// $msg = '<div class="form-group">
+//                 <label for="envio" class="form-label">Selecione a forma de envio:</label>
+//             </div>';
 
-$msg .= '<div class="form-check mt-1">
-            <input class="form-check-input" type="radio" name="envio" id="pac" value="' . $frete_pac->Valor . '" onclick="atualizaTotalCarrinhoRadio(this)" checked>
-            <label class="form-check-label" for="pac">';
+// $msg .= '<div class="form-check mt-1">
+//             <input class="form-check-input" type="radio" name="envio" id="pac" value="' . $frete_pac->Valor . '" onclick="atualizaTotalCarrinhoRadio(this)" checked>
+//             <label class="form-check-label" for="pac">';
 
-$msg .= 'Valor do Frete PAC: R$ <span id="retorno-valor-frete-pac">' . $frete_pac->Valor . '</span> - ';
-if ($frete_pac->PrazoEntrega > 1) {
-    $msg .= "Prazo de entrega: " . $frete_pac->PrazoEntrega . " dias úteis";
-} else {
-    $msg .= "Prazo de entrega: " . $frete_pac->PrazoEntrega . " dia útil";
-}
+// $msg .= 'Valor do Frete PAC: R$ <span id="retorno-valor-frete-pac">' . $frete_pac->Valor . '</span> - ';
+// if ($frete_pac->PrazoEntrega > 1) {
+//     $msg .= "Prazo de entrega: " . $frete_pac->PrazoEntrega . " dias úteis";
+// } else {
+//     $msg .= "Prazo de entrega: " . $frete_pac->PrazoEntrega . " dia útil";
+// }
 
-$msg .= '</label></div>';
+// $msg .= '</label></div>';
 
-$msg .= '<div class="form-check mt-1">
-            <input class="form-check-input" type="radio" name="envio" id="sedex" value="' . $frete_sedex->Valor . '" onclick="atualizaTotalCarrinhoRadio(this)">
-            <label class="form-check-label" for="sedex">';
+// $msg .= '<div class="form-check mt-1">
+//             <input class="form-check-input" type="radio" name="envio" id="sedex" value="' . $frete_sedex->Valor . '" onclick="atualizaTotalCarrinhoRadio(this)">
+//             <label class="form-check-label" for="sedex">';
 
-$msg .= 'Valor do Frete SEDEX: R$ <span id="retorno-valor-frete-sedex">' . $frete_sedex->Valor . '</span> - ';
-if ($frete_sedex->PrazoEntrega > 1) {
-    $msg .= "Prazo de entrega: " . $frete_sedex->PrazoEntrega . " dias úteis";
-} else {
-    $msg .= "Prazo de entrega: " . $frete_sedex->PrazoEntrega . " dia útil";
-}
+// $msg .= 'Valor do Frete SEDEX: R$ <span id="retorno-valor-frete-sedex">' . $frete_sedex->Valor . '</span> - ';
+// if ($frete_sedex->PrazoEntrega > 1) {
+//     $msg .= "Prazo de entrega: " . $frete_sedex->PrazoEntrega . " dias úteis";
+// } else {
+//     $msg .= "Prazo de entrega: " . $frete_sedex->PrazoEntrega . " dia útil";
+// }
 
-$msg .= '</label></div>';
+// $msg .= '</label></div>';
 
-$msg .= '<div class="form-check mt-1">
-<input class="form-check-input" type="radio" name="envio" id="outra-forma" value="0,00" onclick="atualizaTotalCarrinhoRadio(this)">
-<label class="form-check-label" for="outra-forma">
-    Outra forma de envio
-</label>
-</div>';
+// $msg .= '<div class="form-check mt-1">
+// <input class="form-check-input" type="radio" name="envio" id="outra-forma" value="0,00" onclick="atualizaTotalCarrinhoRadio(this)">
+// <label class="form-check-label" for="outra-forma">
+//     Outra forma de envio
+// </label>
+// </div>';
 
-echo $msg;
+// echo $msg;
+
+$frete = [];
+array_push($frete, $frete_pac);
+array_push($frete, $frete_sedex);
+
+echo json_encode($frete);
