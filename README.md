@@ -21,3 +21,5 @@ O usuário poderá informar o CEP de destino que será feito o cálculo do frete
 
 ### Refatorações
 - 15/04/2023 - Criado função para atualizar o valor do frete de acordo com a quantidade de produtos.
+
+- 20/04/2023 - Realizado melhoras e ajustes na obtenção, retorno e exibição dos valores de frete dos correios. O no retorno converte o XML para JSON e processa as informações e efetua os cálculos de acordo com a quantidade no JavaScript.
