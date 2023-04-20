@@ -134,12 +134,39 @@ body {
     border: 1px solid #c0c0c0;
 }
 
-#total-geral {
+#total-carrinho {
     color: red;
+    margin-bottom: 50px;
 }
 
 .carregando {
     vertical-align: middle;
     display: none;
     margin-left: 40px;
+}
+
+.box-gray {
+    background-color: #ccc;
+    padding: 5px;
+}
+
+.box-yellow {
+    background-color: yellow;
+    padding: 5px;
+}
+
+.border {
+    border: solid 1px #ccc;
+}
+
+.border-2 {
+    border: solid 2px #ccc;
+}
+
+.border-black {
+    border: solid 1px #000;
+}
+
+#exibeFrete {
+    display: none;
 }

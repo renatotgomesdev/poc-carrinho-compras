@@ -1,0 +1,14 @@
+<cServico>
+<Codigo>50010</Codigo>
+<Valor>30,50</Valor>
+<PrazoEntrega>1</PrazoEntrega>
+<ValorSemAdicionais>30,50</ValorSemAdicionais>
+<ValorMaoPropria>0,00</ValorMaoPropria>
+<ValorAvisoRecebimento>0,00</ValorAvisoRecebimento>
+<ValorValorDeclarado>0,00</ValorValorDeclarado>
+<EntregaDomiciliar>S</EntregaDomiciliar>
+<EntregaSabado>S</EntregaSabado>
+<obsFim/>
+<Erro>0</Erro>
+<MsgErro/>
+</cServico>

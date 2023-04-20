@@ -1,119 +1,58 @@
-// ===== [Inicio - window.load] Executa somente depois que toda a página HTML é completamente carregada =====
-window.onload = function() {
-        /**
-         * Adicionar ao Carrinho de Compras
-         * @returns {void}
-         */
-        document.querySelectorAll('.btn-adicionar').forEach(function(botao) {
-            botao.addEventListener('click', function() {
-                var id = this.getAttribute('data-id');
-                var valor = this.getAttribute('data-value');
-                addCarrinho(id, valor);
-            });
+// ===== [ Inicio - window.onload ] - Executa somente depois que toda a página HTML é completamente carregada =====
+window.onload = function () { // Contruct
+    // Executa somente se o elemento com id "itens-total" existir
+    if (document.getElementById('itens-total')) {
+        elItensTotal = document.getElementById('itens-total'); // Atribui a variável elItensTotal o elemento
+        elItensTotal.textContent = totalItens(); // Atualizar o total de itens/produtos do carrinho de compras
+    }
+
+    // Executa as funções
+    botaoAjusteQuantidade();
+    boxAjusteQuantidade();
+    adicionaCarrinhoCompra();
+    elRadioFrete();
+
+    // Define a função no botão "Limpar Dados"
+    const btnLimpar = document.querySelector('#btn-limpar');
+    btnLimpar.addEventListener('click', function () {
+        limparCarrinho(); // Função deleta os dados do localStorage
+    });
+
+    // Botão Calcular Frete
+    if (document.querySelector('#btn-calcula-frete')) {
+        btnCalculaFrete = document.querySelector('#btn-calcula-frete');
+        btnCalculaFrete.addEventListener('click', function () {
+            calcularFrete(); // Executa a função
         });
+    }
 
-        // Botões de controle de quantidade de produto
-        document.querySelectorAll('.btn-qtd').forEach(function(botao) {
-            botao.addEventListener('click', function() {
-                reset(); // Faz o reset das informações de frete
-                var op = this.textContent;
-                if (op == '-') { // Executa se for pressionado o botão de diminuir quantidade
-                    var qtd = parseInt(this.nextSibling.value) - 1;
-                    if (qtd < 1) qtd = 1; // Impede que a quantidade seja menor que 1
-                    this.nextSibling.value = qtd;
-                    var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.value;
-                    //var valor_unit = valor;
-                    var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
-                    var id = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
-                    valor = multiplicarFormatBr(valor, qtd);
-                    this.nextSibling.nextSibling.nextSibling.nextSibling.textContent = valor;
-                } else { // Executa se for clicado o botão de aumentar quantidade
-                    var qtd = parseInt(this.previousSibling.value) + 1;
-                    this.previousSibling.value = qtd;
-                    var valor = this.nextSibling.nextSibling.nextSibling.value;
-                    //var valor_unit = valor;
-                    var cod = this.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
-                    var id = this.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
-                    valor = multiplicarFormatBr(valor, qtd);
-                    this.nextSibling.nextSibling.textContent = valor;
-                }
+    let db = new dbStorage("itens"); // Instancia a função dbStorage
+    let itens = db.all(); // Atribui todos os registros do localStorge na variável itens
+    
+    if (itens) { // Executa se a variável itens não for vazia
+        document.querySelector('.carrinho').textContent = itens.length; // Atualiza a quantidade de itens no botão carrinho de compras
+        document.querySelector('#carrinho').value = JSON.stringify(itens); // Atualiza o value da input carrinho
+    }
+    else { // Executa se a variável itens estiver vazia
+        document.querySelector('.carrinho').textContent = 0; // Define 0 no botão carrinho de compras
+        document.querySelector('#carrinho').value = 0; // Define 0 no value da inputa carrinho
+    }
 
-                // Atualiza o valor total do produto de acordo com a quantidade
-                document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item");
-                //console.log('Operação: ' + op + '\nQuantidade: ' + qtd + '\nValor: R$ ' + multiplicarFormatBr(valor, qtd));
+    // Executa de o elemnto id="total-produtos" existir na página
+    if (document.querySelector('#total-produtos')) {
+        document.querySelector('#total-produtos').textContent = calculaTextContent(".valor-item"); // Atualiza o valor total de produtos
+    }
 
-                // Atualizar a quantidade e o valor do produto no localStorage
-                let db = new dbStorage("itens");
-                var item = {
-                    id: id,
-                    qtd: qtd,
-                    valor: valor
-                };
-                db.add(itens, item, cod);
-            });
-        });
+    // Atualizar o valor unitário do produto na value das inputs com classe "valorUnitario"
+    document.querySelectorAll('.valorUnitario').forEach(function (el) {
+        let valorTotal = el.value;
+        let valorQtd = el.getAttribute('data-qtd');
+        el.value = dividirFormatBr(valorTotal, valorQtd);
+    });
 
-        // Atualizar a quantiade e o valor digitado diretamente no campo (input)
-        document.querySelectorAll('.box-qtd').forEach(function(botao) {
-            botao.addEventListener('blur', function() {
-                reset(); // Faz o reset das informações de frete
-                var qtd = this.value; // Obtém a quantidade
+} // ===== [Fim - window.load] =====
 
-                // Impede que a quantidade seja menor que 1
-                if (qtd < 1) {
-                    qtd = 1;
-                    this.value = qtd;
-                }
-                var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.value; // Obtém o valor do produto
-                var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod'); // Obtém o código (id) do produto
-                valor = multiplicarFormatBr(valor, qtd); // Função que multiplica o valor pela quantidade e retorna o resultado
-                this.nextSibling.nextSibling.nextSibling.textContent = valor; // Atualizar o valor de acordo com a quantidade
-                document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item"); // Atualizar o valor total do carrinho de compras
-                //console.log('Operação: ' + op + '\nQuantidade: ' + qtd + '\nValor: R$ ' + multiplicarFormatBr(valor, qtd));
-            });
-        });
-
-        // Define a função no botão "Limpar Dados"
-        const btnLimpar = document.querySelector('#btn-limpar');
-        btnLimpar.addEventListener('click', function() {
-            limparCarrinho(); // Função deleta os dados do localStorage
-        });
-
-        // Botão que aciona as funções para cálculo do frete
-        if (document.querySelector('#btn-calcula-frete')) {
-            btnCalculaFrete = document.querySelector('#btn-calcula-frete');
-            btnCalculaFrete.addEventListener('click', function() {
-                calcularFrete();
-                // setTimeout(atualizaTotalCarrinho, 1200);
-                // setTimeout(atualizaTotalCarrinhoQuantidade, 2000);
-            });
-        }
-
-        let db = new dbStorage("itens");
-        let itens = db.all();
-        if (itens) {
-            document.querySelector('.carrinho').textContent = itens.length;
-            document.querySelector('#carrinho').value = JSON.stringify(itens);
-        } else {
-            document.querySelector('.carrinho').textContent = 0;
-            document.querySelector('#carrinho').value = 0;
-        }
-
-        if (document.querySelector('#total-carrinho')) {
-            document.querySelector('#total-carrinho').textContent = calculaTextContent(".valor-item");
-        }
-
-
-        //debugger
-        document.querySelectorAll('.valorUnitario').forEach(function(el) {
-            let valorTotal = el.value;
-            let valorQtd = el.getAttribute('data-qtd');
-            el.value = dividirFormatBr(valorTotal, valorQtd);
-        });
-
-    } // ===== [Fim - window.load] =====
-
-// ===== [Inicio - Funções para tratamento com localStorage] =====
+// ===== [Inicio - Funções de manipulação do localStorage] =====
 /**
  * Cria e retorna um objeto com funções para manipulação de dados em localStorage.
  * @param {string} table - O nome da tabela a ser criada ou manipulada.
@@ -185,7 +124,7 @@ function addCarrinho(id, valor) {
     };
 
     if (itens.length > 0) {
-        itens.forEach(function(value, index) {
+        itens.forEach(function (value, index) {
             if (value.id == id) {
                 itemExist = true;
             }
@@ -207,7 +146,6 @@ function addCarrinho(id, valor) {
 
         alert("Item incluído no carrinho com sucesso.");
     }
-
 }
 
 /**
@@ -226,9 +164,149 @@ function limparCarrinho() {
     //locatin.reload();
     location.href = "/";
 }
-// ===== [Fim - Funções para tratamento com localStorage] =====
+
+/**
+ * Função responsável por atualizar a quantidade e valor de um produto no localStorage.
+ *
+ * @param {string} id - O id do produto a ser atualizado.
+ * @param {number} qtd - A nova quantidade do produto.
+ * @param {number} valor - O novo valor do produto.
+ * @param {string} index - O index é o indice do array.
+ * @returns {void}
+ *
+ * @example
+ * // Atualiza a quantidade e o valor do produto com id "1" para 3 unidades, R$ 50,00 e indice 1 do array.
+ * atualizaQuantidadelocalStorage("2", 3, 50.00, "1");
+ */
+ function atualizaQuantidadelocalStorage(id, qtd, valor, index) {
+    // Atualizar a quantidade e o valor do produto no localStorage
+    let db = new dbStorage("itens");
+    let itens = db.all();
+    var item = {
+        id: id,
+        qtd: qtd,
+        valor: valor
+    };
+    db.add(itens, item, index);
+}
+
+// ===== [Fim - Funções de manipulação no localStorage] =====
 
 // ===== [Inicio - Funções Auxiliáres] =====
+
+/**
+ * Adicionar item ao Carrinho de Compras
+ * @returns {void}
+ */
+function adicionaCarrinhoCompra() {
+    document.querySelectorAll('.btn-adicionar').forEach(function (botao) {
+        botao.addEventListener('click', function () {
+            var id = this.getAttribute('data-id');
+            var valor = this.getAttribute('data-value');
+            addCarrinho(id, valor);
+        });
+    });
+}
+
+/**
+ * Calcula o total de itens/produtos somando as quantidades de cada item/produto presentes em elementos com a classe '.box-qtd'.
+ * @return {number} Retorna o total de itens/produtos.
+ */
+function totalItens() {
+    let total = 0;
+    /**
+     * Atribui a variável inputQuantidadeItens todos os elementos do documento que possuem a classe CSS '.box-qtd'.
+     * A classe '.box-qtd' é onde fica armazenado o valor da quantidade de cada item/produto
+     */
+    let inputQuantidadeItens = document.querySelectorAll('.box-qtd');
+    inputQuantidadeItens.forEach(function (el) {
+        total += parseInt(el.value);
+    });
+    return total;
+}
+
+/**
+ * Função que atrubui a funcionalidade nos botões de ajuste de quantidade de itens/produtos
+ *
+ * @returns {void}
+ */
+function botaoAjusteQuantidade() {
+    document.querySelectorAll('.btn-qtd').forEach(function (botao) {
+        botao.addEventListener('click', function () {
+            ocultaFrete();
+            var op = this.textContent;
+            if (op == '-') { // Executa se for pressionado o botão de diminuir quantidade
+                var qtd = parseInt(this.nextSibling.value) - 1;
+                if (qtd < 1) qtd = 1; // Impede que a quantidade seja menor que 1
+                this.nextSibling.value = qtd;
+                var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.value;
+                //var valor_unit = valor;
+                var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
+                var id = this.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
+                valor = multiplicarFormatBr(valor, qtd);
+                this.nextSibling.nextSibling.nextSibling.nextSibling.textContent = valor;
+            } else { // Executa se for clicado o botão de aumentar quantidade
+                var qtd = parseInt(this.previousSibling.value) + 1;
+                this.previousSibling.value = qtd;
+                var valor = this.nextSibling.nextSibling.nextSibling.value;
+                //var valor_unit = valor;
+                var cod = this.nextSibling.nextSibling.nextSibling.getAttribute('data-cod');
+                var id = this.nextSibling.nextSibling.nextSibling.getAttribute('data-id');
+                valor = multiplicarFormatBr(valor, qtd);
+                this.nextSibling.nextSibling.textContent = valor;
+            }
+
+            // Atualiza o valor total do produto de acordo com a quantidade
+            document.querySelector('#total-produtos').textContent = calculaTextContent(".valor-item");
+
+            atualizaQuantidadelocalStorage(id, qtd, valor, cod);
+
+            // ======= [ Ínicio - Testes ] =======
+
+            // Atualia a quantidade total de itens/produtos do carrinho de compras
+            if (elItensTotal) elItensTotal.textContent = totalItens();
+
+            // ======= [ Fim - Testes ] =======
+        });
+    });
+}
+
+/**
+ * Função que atualiza a quantidade de itens/produtos digitados diretamente na box (input) quantidade
+ * 
+ * @returns {void}
+ */
+function boxAjusteQuantidade() {
+    // Atualizar a quantiade e o valor digitado diretamente no campo (input)
+    document.querySelectorAll('.box-qtd').forEach(function (botao) {
+        botao.addEventListener('blur', function () {
+            ocultaFrete();
+            var qtd = this.value; // Obtém a quantidade
+
+            // Impede que a quantidade seja menor que 1
+            if (qtd < 1) {
+                qtd = 1;
+                this.value = qtd;
+            }
+            var valor = this.nextSibling.nextSibling.nextSibling.nextSibling.value; // Obtém o valor do produto
+            var id = this.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-id'); // Obtém o id do produto
+            var cod = this.nextSibling.nextSibling.nextSibling.nextSibling.getAttribute('data-cod'); // Obtém o indice do array
+            valor = multiplicarFormatBr(valor, qtd); // Função que multiplica o valor pela quantidade e retorna o resultado
+            this.nextSibling.nextSibling.nextSibling.textContent = valor; // Atualizar o valor de acordo com a quantidade
+            document.querySelector('#total-produtos').textContent = calculaTextContent(".valor-item"); // Atualizar o valor total do carrinho de compras
+
+            atualizaQuantidadelocalStorage(id, qtd, valor, cod);
+
+            // ======= [ Ínicio - Testes ] =======
+
+            // Atualia a quantidade total de itens/produtos do carrinho de compras
+            if (elItensTotal) elItensTotal.textContent = totalItens();
+
+            // ======= [ Fim - Testes ] =======
+        });
+    });
+}
+
 /**
  * Multiplica um número no formato "R$ X,XX" por outro número e retorna o resultado formatado como "R$ Y,YY".
  * @param {string} valor - O valor a ser multiplicado no formato "R$ X,XX".
@@ -266,7 +344,7 @@ function dividirFormatBr(valor, divisor) {
  */
 function calculaTextContent(el) {
     let soma = 0;
-    document.querySelectorAll(el).forEach(function(elemento) {
+    document.querySelectorAll(el).forEach(function (elemento) {
         conteudo = elemento.textContent;
         conteudo = conteudo.replace(".", "");
         conteudo = conteudo.replace(",", ".");
@@ -283,7 +361,7 @@ function calculaTextContent(el) {
  */
 function calcularValue(el) {
     let soma = 0;
-    document.querySelectorAll(el).forEach(function(elemento) {
+    document.querySelectorAll(el).forEach(function (elemento) {
         conteudo = elemento.value;
         conteudo = conteudo.replace(".", "");
         conteudo = conteudo.replace(",", ".");
@@ -317,7 +395,7 @@ function convertNumberFormatBR(num) {
 // ===== [Fim - Funções para tratamento com localStorage] =====
 
 
-// ===== [Inicio - Funções para obter dados do frete] =====
+// ===== [Inicio - Funções manipulação do frete] =====
 
 /**
  * Faz uma solicitação AJAX para calcular o valor do frete com base no CEP informado pelo usuário.
@@ -326,24 +404,29 @@ function calcularFrete() {
     let loading = document.querySelector('.carregando');
     loading.style.display = 'inline-block';
     btnCalculaFrete.style.display = 'none';
-    // Captura o valor do input cep
-    var cep = document.getElementById("cep").value;
+
+    var cep = document.getElementById("cep").value; // Captura o valor do input cep
+
     // Cria uma solicitação AJAX
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status == 200) {
                 try {
                     dados_frete = JSON.parse(xhr.responseText);
                     //return dados_frete;
-                    document.getElementById('radio-pac').value = dados_frete[0].Valor;
-                    document.getElementById('valor-pac').textContent = dados_frete[0].Valor;
+                    let valorFretePac = multiplicarFormatBr(dados_frete[0].Valor, totalItens());
+                    let valorFreteSedex = multiplicarFormatBr(dados_frete[1].Valor, totalItens());
+                    document.getElementById('radio-pac').value = valorFretePac;
+                    document.getElementById('valor-pac').textContent = valorFretePac;
                     document.getElementById('prazo-pac').textContent = dados_frete[0].PrazoEntrega;
-                    document.getElementById('radio-sedex').value = dados_frete[1].Valor;
-                    document.getElementById('valor-sedex').textContent = dados_frete[1].Valor;
+                    document.getElementById('radio-sedex').value = valorFreteSedex;
+                    document.getElementById('valor-sedex').textContent = valorFreteSedex;
                     document.getElementById('prazo-sedex').textContent = dados_frete[1].PrazoEntrega;
+                    elRadioFrete();
                     loading.style.display = 'none';
                     btnCalculaFrete.style.display = 'inline-block';
+                    document.getElementById('exibeFrete').style.display = "block";
                 } catch (e) {
                     alert('Verifique se você informou o CEP corretamente.\nSe o erro persistir, comunique o suporte técnico.')
                     console.log('Erro: O retorno não é um formato JSON válido');
@@ -360,92 +443,51 @@ function calcularFrete() {
         }
 
     };
-    xhr.open('GET', 'calcular.php?cep=' + cep, true);
+    xhr.open('GET', 'calcular_api_remota.php?cep=' + cep, true);
     xhr.send();
 }
 
 /**
- * Reseta os valores exibidos na tela de cálculo de frete.
+ * Oculta informações de frete
  */
-function reset() {
-    document.getElementById('valor-frete').innerHTML = '';
-    document.getElementById('total-geral').innerHTML = '';
-    document.getElementById('hr-total').style.display = 'none';
+function ocultaFrete() {
+    document.getElementById('exibeFrete').style.display = 'none';
 }
 
 /**
- * Atualiza o valor total do carrinho de compras com base no valor do frete selecionado.
+ * Atualiza o valor total do carrinho com base no valor do frete.
+ * @param {string} valorFrete - O valor do frete a ser adicionado ao total do carrinho.
+ * @returns {void}
  */
-function atualizaTotalCarrinho() {
-    let valorFrete = '';
-    if (document.querySelector('#total-carrinho')) {
-        let totalCarrinho = document.querySelector('#total-carrinho').textContent;
-        if (document.querySelector('#total-carrinho')) {
-            if (document.querySelector('#retorno-valor-frete-pac')) {
-                valorFrete = document.querySelector('#retorno-valor-frete-pac').textContent;
-            }
-
-            //valorFrete = document.querySelector('#retorno-valor-frete-sedex').textContent;
+function atualizaTotalCarrinho(valorFrete) {
+    if (document.querySelector('#total-produtos')) {
+        let elTotalProdutos = document.querySelector('#total-produtos');
+        let elTotalCarrinho = document.querySelector('#total-carrinho');
+        let valorTotalProdutos = elTotalProdutos.textContent;
+        let valorTotalCarrinho = 0;
+        if (valorFrete) {
+            valorTotalCarrinho = convertNumberBRparaFloat(valorTotalProdutos) + convertNumberBRparaFloat(valorFrete);
+            elTotalCarrinho.innerHTML = 'Total da Compra: R$ <span>' + convertNumberFormatBR(valorTotalCarrinho) + '</span>';
+        } else {
+            elTotalCarrinho.innerHTML = 'Total da Compra: R$ <span>' + valorTotalProdutos + '</span>';
         }
-
-        let valorAtualizado = convertNumberBRparaFloat(totalCarrinho) + convertNumberBRparaFloat(valorFrete);
-        document.querySelector('#total-geral').innerHTML = 'Total da Compra: R$ <span>' + convertNumberFormatBR(valorAtualizado) + '</span>';
-        document.getElementById('hr-total').style.display = 'block';
     }
-}
-
-function atualizaTotalCarrinhoQuantidade() {
-    let quantidade_total = 0;
-    document.querySelectorAll('.box-qtd').forEach(function(el) {
-        quantidade_total += parseInt(el.value);
-    });
-    console.log(quantidade_total);
-
-    total_carrinho = convertNumberBRparaFloat(document.querySelector('#total-carrinho').textContent);
-    frete_pac = convertNumberBRparaFloat(document.querySelector('#retorno-valor-frete-pac').textContent);
-    frete_sedex = convertNumberBRparaFloat(document.querySelector('#retorno-valor-frete-sedex').textContent);
-    if (document.querySelector('#total-geral')) {
-        total_geral = convertNumberBRparaFloat(document.querySelector('#total-geral > span').textContent);
-    }
-
-
-    frete_pac = frete_pac * quantidade_total;
-    frete_sedex = frete_sedex * quantidade_total;
-    total_geral = total_geral + frete_pac;
-
-    document.querySelector('#retorno-valor-frete-pac').textContent = convertNumberFormatBR(frete_pac);
-    document.querySelector('#retorno-valor-frete-sedex').textContent = convertNumberFormatBR(frete_sedex);
-    document.querySelector('#pac').value = convertNumberFormatBR(frete_pac);
-    document.querySelector('#sedex').value = convertNumberFormatBR(frete_sedex);
-    document.querySelector('#total-geral > span').textContent = convertNumberFormatBR(total_geral);
-
 }
 
 /**
- * Atualiza o valor total do carrinho de compras com base no valor do frete selecionado através de um input radio.
- * @param {HTMLInputElement} inputRadio - O input radio clicado que contém o valor do frete selecionado.
+ * Atualizar o valor total do Carrinho de Compra de acordo com a opção de frete selecionado
+ * @returns {void}
  */
-function atualizaTotalCarrinhoRadio(inputRadio) {
-    let valorFrete = '';
-    if (document.querySelector('#total-carrinho')) {
-        let totalCarrinho = document.querySelector('#total-carrinho').textContent;
-        if (document.querySelector('#total-carrinho')) {
-            // Remove o atributo "checked" de todos os inputs com o mesmo nome
-            var inputs = document.getElementsByName(inputRadio.name);
-            for (var i = 0; i < inputs.length; i++) {
-                inputs[i].removeAttribute("checked");
-            }
-            // Adiciona o atributo "checked" no input clicado
-            inputRadio.setAttribute("checked", true);
-            // Obtém o valor do input clicado e exibe no console
-            valorFrete = inputRadio.value;
-            //console.log(valor);
-        }
-
-        let valorAtualizado = convertNumberBRparaFloat(totalCarrinho) + convertNumberBRparaFloat(valorFrete);
-        document.querySelector('#total-geral').innerHTML = 'Total da Compra: R$ <span>' + convertNumberFormatBR(valorAtualizado) + '</span>';
-        document.getElementById('hr-total').style.display = 'block';
+function elRadioFrete() {
+    if (document.querySelectorAll('input[type=radio][name=envio]')) {
+        const inputsRadio = document.querySelectorAll('input[type=radio][name=envio]');
+        inputsRadio.forEach(function (radio) {
+            atualizaTotalCarrinho(inputsRadio[0].value);
+            radio.addEventListener('click', function () {
+                atualizaTotalCarrinho(radio.value);
+            });
+        });
     }
 }
 
-// ===== [Fim - Funções para obter dados do frete] =====
+// ===== [Fim - Funções manipulação do frete] =====
